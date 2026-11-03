@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=68"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -9,7 +9,33 @@ description = "Route events to Claude Code and Codex running on your own machine
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Xixian Yang" }]
+keywords = ["claude-code", "codex", "ai-agents", "human-in-the-loop", "webhooks", "slack", "feishu", "automation"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Operating System :: MacOS",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Software Development",
+]
 dependencies = []
+
+[project.optional-dependencies]
+feishu-encryption = ["cryptography"]
+
+[project.urls]
+Homepage = "https://github.com/XixianWasTaken/dispatchbox"
+Documentation = "https://github.com/XixianWasTaken/dispatchbox/tree/main/docs"
+Issues = "https://github.com/XixianWasTaken/dispatchbox/issues"
+Changelog = "https://github.com/XixianWasTaken/dispatchbox/blob/main/CHANGELOG.md"
 
 [project.scripts]
 dispatchbox = "dispatchbox.__main__:main"

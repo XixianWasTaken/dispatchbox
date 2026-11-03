@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/logo.png" alt="dispatchbox logo" width="120">
+  <img src="https://raw.githubusercontent.com/XixianWasTaken/dispatchbox/main/docs/logo.png" alt="dispatchbox logo" width="120">
 </p>
 
 <h1 align="center">dispatchbox</h1>
@@ -10,13 +10,13 @@
 </p>
 
 <p align="center">
-  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue.svg"></a>
+  <a href="https://github.com/XixianWasTaken/dispatchbox/blob/main/LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue.svg"></a>
   <img alt="Python 3.10+" src="https://img.shields.io/badge/python-3.10%2B-blue.svg">
   <img alt="Dependencies: stdlib only" src="https://img.shields.io/badge/dependencies-stdlib%20only-brightgreen.svg">
 </p>
 
 <p align="center">
-  <strong>English</strong> · <a href="README.zh-CN.md">简体中文</a> · <a href="docs/README.md">Documentation</a> · <a href="docs/rules.md">Rules Guide</a> · <a href="docs/reference.md">CLI &amp; API Reference</a>
+  <strong>English</strong> · <a href="https://github.com/XixianWasTaken/dispatchbox/blob/main/README.zh-CN.md">简体中文</a> · <a href="https://github.com/XixianWasTaken/dispatchbox/blob/main/docs/README.md">Documentation</a> · <a href="https://github.com/XixianWasTaken/dispatchbox/blob/main/docs/rules.md">Rules Guide</a> · <a href="https://github.com/XixianWasTaken/dispatchbox/blob/main/docs/reference.md">CLI &amp; API Reference</a>
 </p>
 
 **dispatchbox** is a lightweight hub-and-worker daemon (~2,700 lines of dependency-free Python) that turns **Claude Code (`claude`)** and **OpenAI Codex CLI (`codex`)** from interactive terminal tools into event-driven background workers running on your own hardware.
@@ -34,6 +34,7 @@ python3 -m dispatchbox check --rules examples/hello.json
 
 - [Why dispatchbox?](#why-dispatchbox)
 - [Quick start (2 minutes)](#quick-start)
+- [Installation](#installation)
 - [Core capabilities](#core-capabilities)
 - [Real-world use cases](#real-world-use-cases)
 - [How it works](#how-it-works)
@@ -75,7 +76,7 @@ export DISPATCHBOX_TOKEN="$(python3 -c 'import secrets; print(secrets.token_urls
 
 ### 2. Start the hub
 
-The bundled [`examples/hello.json`](examples/hello.json) defines `require_decision_for: ["delete_data"]` and three rules:
+The bundled [`examples/hello.json`](https://github.com/XixianWasTaken/dispatchbox/blob/main/examples/hello.json) defines `require_decision_for: ["delete_data"]` and three rules:
 - `ask`: read-only (`--allowed-tools Read,Glob,Grep`)
 - `tidy`: read-only initially; must ask before deleting any file
 - `after-decision`: triggered on `dispatchbox/decision.made`; resumes the session with `Read,Glob,Grep,Bash(rm:*)`
@@ -125,6 +126,17 @@ Open **http://127.0.0.1:8787** in your browser, click run **`#2`**, and click **
 NOTIFY [dispatchbox] run #3 after-decision: succeeded | Deleted old.log from the demo directory after owner approval and verified only notes.md remains. | Open: /runs/3
 ```
 
+## Installation
+
+dispatchbox is on PyPI and has no dependencies:
+
+```bash
+pip install dispatchbox          # or: uv tool install dispatchbox
+dispatchbox --version
+```
+
+The installed `dispatchbox` command is the same as `python3 -m dispatchbox` in the quick start. The quick start runs from a clone because it uses the bundled `examples/hello.json`. To decrypt Feishu events signed with an Encrypt Key, install the optional extra: `pip install "dispatchbox[feishu-encryption]"`.
+
 ## Core capabilities
 
 ### 1. Multi-source event normalization, deduplication, and coalescing
@@ -157,11 +169,11 @@ Instead of approving individual bash commands, you declare high-level risk categ
 
 ## Real-world use cases
 
-[`rules.example.json`](rules.example.json) contains example rules to adapt. Replace its placeholder worker names (`m4`, `m5`), paths and sources with your own:
+[`rules.example.json`](https://github.com/XixianWasTaken/dispatchbox/blob/main/rules.example.json) contains example rules to adapt. Replace its placeholder worker names (`m4`, `m5`), paths and sources with your own:
 
 1. **Automated read-only PR reviews (`codex`)**: Trigger on `github` `pr.opened` / `pr.synchronize`, run `codex` with `-s read-only` in your local checkout, and post actionable bug reports via `gh pr review`.
 2. **Self-healing CI failures (`claude`)**: Trigger on `github` `ci.failure`, route to a specific build machine (`"worker": "m4"`), allow `Bash(git:*),Bash(gh:*),Bash(npm test:*)`, and let Claude inspect logs and push a fix to the failing branch.
-3. **Two-stage destructive maintenance (a pattern to write yourself)**: Give a `cron` rule read-only `args` and list `delete_data` in `require_decision_for`, so the agent finds stale resources and asks first; approve from Slack or Feishu, and an `after-decision` rule resumes the session with delete permissions. `rules.example.json` does not include this; its `nightly-cleanup` rule runs weekly without an approval step. [`examples/hello.json`](examples/hello.json) shows the same two-stage pattern on a small scale (`tidy`, then `after-decision`).
+3. **Two-stage destructive maintenance (a pattern to write yourself)**: Give a `cron` rule read-only `args` and list `delete_data` in `require_decision_for`, so the agent finds stale resources and asks first; approve from Slack or Feishu, and an `after-decision` rule resumes the session with delete permissions. `rules.example.json` does not include this; its `nightly-cleanup` rule runs weekly without an approval step. [`examples/hello.json`](https://github.com/XixianWasTaken/dispatchbox/blob/main/examples/hello.json) shows the same two-stage pattern on a small scale (`tidy`, then `after-decision`).
 4. **Test rules before running**: Validate your configuration and dry-run event matching from the CLI:
    ```bash
    python3 -m dispatchbox check --rules rules.example.json --source github --type ci.failure --subject me/app:main
@@ -172,7 +184,7 @@ Instead of approving individual bash commands, you declare high-level risk categ
 ## How it works
 
 <p align="center">
-  <img src="docs/how-it-works.png" alt="dispatchbox system architecture and workflow diagram" width="100%">
+  <img src="https://raw.githubusercontent.com/XixianWasTaken/dispatchbox/main/docs/how-it-works.png" alt="dispatchbox system architecture and workflow diagram" width="100%">
 </p>
 
 1. **Ingest & Match**: The hub receives an event, checks `dedupe_key` against the SQLite `events` table, evaluates `rules.json` in order, and either coalesces the event into an existing `queued` run or inserts a new `queued` run.
@@ -180,7 +192,7 @@ Instead of approving individual bash commands, you declare high-level risk categ
 3. **Execute & Parse**: The worker verifies `cwd` is inside `--allow-dir`, spawns `claude`, `codex`, or `/bin/sh`, streams heartbeats every 20s, and parses the CLI's JSON output for the final response, `session_id`, token counts, and cost.
 4. **Decide & Resume**: If the output contains `DISPATCHBOX_DECISION: {...}`, the run enters `awaiting_decision`. When an authorized user selects an option (via Web UI, Slack, Feishu, or `POST /runs/{id}/decision`), the hub records the choice and emits a `dispatchbox/decision.made` event. A rule matching that event queues a follow-up run with the original run as its parent, and the worker resumes the parent's `session_id`.
 
-See [Architecture](docs/architecture.md) for the sequence diagram, SQLite schema, and module breakdown.
+See [Architecture](https://github.com/XixianWasTaken/dispatchbox/blob/main/docs/architecture.md) for the sequence diagram, SQLite schema, and module breakdown.
 
 ## Comparison with alternatives
 
@@ -215,19 +227,19 @@ A worker executes coding agents on your machine under your OS user account. Keep
 - **Treat event payloads as untrusted input**: Public GitHub issues, PR descriptions, and chat messages are injected into prompts. Never give rules triggered by untrusted external events unrestricted shell or write access.
 - **Lock down public hubs**: Always pass `--public-url https://...` when exposing the hub behind a reverse proxy or tunnel so the web dashboard enforces token authentication on every request.
 
-Read **[SECURITY.md](SECURITY.md)** before exposing the hub to a network.
+Read **[SECURITY.md](https://github.com/XixianWasTaken/dispatchbox/blob/main/SECURITY.md)** before exposing the hub to a network.
 
 ## Documentation
 
 | Guide | What it covers |
 |---|---|
-| **[Documentation Index](docs/README.md)** | Overview of all guides, example configs, and project roadmap |
-| **[Rules, Events & Decisions](docs/rules.md)** | Complete `rules.json` schema, event normalization, GitHub webhook mapping, templating, cron syntax, decisions, and retries |
-| **[Slack & Feishu Integration](docs/chat.md)** | Step-by-step app setup, permissions, signature/encryption verification, allowlists, and interactive cards |
-| **[Deployment Guide](docs/deployment.md)** | Single-machine vs. remote-hub topologies, `launchd` (macOS) and `systemd` (Linux) service templates, GitHub webhooks, and SQLite backups |
-| **[CLI & API Reference](docs/reference.md)** | All `dispatchbox` subcommands (`hub`, `worker`, `send`, `check`), environment variables, HTTP API endpoints, and run states |
-| **[Architecture](docs/architecture.md)** | Internal design decisions, request lifecycle, SQLite data model, and module breakdown |
-| **[Troubleshooting](docs/troubleshooting.md)** | Common exit codes (`124`, `126`, `127`), webhook signature errors, TLS certificate fixes, and stuck runs |
+| **[Documentation Index](https://github.com/XixianWasTaken/dispatchbox/blob/main/docs/README.md)** | Overview of all guides, example configs, and project roadmap |
+| **[Rules, Events & Decisions](https://github.com/XixianWasTaken/dispatchbox/blob/main/docs/rules.md)** | Complete `rules.json` schema, event normalization, GitHub webhook mapping, templating, cron syntax, decisions, and retries |
+| **[Slack & Feishu Integration](https://github.com/XixianWasTaken/dispatchbox/blob/main/docs/chat.md)** | Step-by-step app setup, permissions, signature/encryption verification, allowlists, and interactive cards |
+| **[Deployment Guide](https://github.com/XixianWasTaken/dispatchbox/blob/main/docs/deployment.md)** | Single-machine vs. remote-hub topologies, `launchd` (macOS) and `systemd` (Linux) service templates, GitHub webhooks, and SQLite backups |
+| **[CLI & API Reference](https://github.com/XixianWasTaken/dispatchbox/blob/main/docs/reference.md)** | All `dispatchbox` subcommands (`hub`, `worker`, `send`, `check`), environment variables, HTTP API endpoints, and run states |
+| **[Architecture](https://github.com/XixianWasTaken/dispatchbox/blob/main/docs/architecture.md)** | Internal design decisions, request lifecycle, SQLite data model, and module breakdown |
+| **[Troubleshooting](https://github.com/XixianWasTaken/dispatchbox/blob/main/docs/troubleshooting.md)** | Common exit codes (`124`, `126`, `127`), webhook signature errors, TLS certificate fixes, and stuck runs |
 
 ## Development & contributing
 
@@ -244,8 +256,8 @@ python3 -m dispatchbox check --rules examples/hello.json
 python3 -m dispatchbox check --rules rules.example.json
 ```
 
-Contributions are welcome! Please read **[CONTRIBUTING.md](CONTRIBUTING.md)** for our design principles (stdlib-only core, thin over clever, safe by default) and instructions for adding new adapters.
+Contributions are welcome! Please read **[CONTRIBUTING.md](https://github.com/XixianWasTaken/dispatchbox/blob/main/CONTRIBUTING.md)** for our design principles (stdlib-only core, thin over clever, safe by default) and instructions for adding new adapters.
 
 ## License
 
-Released under the [MIT License](LICENSE).
+Released under the [MIT License](https://github.com/XixianWasTaken/dispatchbox/blob/main/LICENSE).

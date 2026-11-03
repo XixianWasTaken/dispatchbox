@@ -34,6 +34,7 @@ python3 -m dispatchbox check --rules examples/hello.json
 
 - [为什么需要 dispatchbox？](#为什么需要-dispatchbox)
 - [2 分钟快速开始](#快速开始)
+- [安装](#安装)
 - [核心能力](#核心能力)
 - [典型使用场景](#典型使用场景)
 - [工作原理](#工作原理)
@@ -124,6 +125,17 @@ NOTIFY [dispatchbox] run #2 tidy: awaiting_decision | Question: Delete old.log f
 ```text
 NOTIFY [dispatchbox] run #3 after-decision: succeeded | Deleted old.log from the demo directory after owner approval and verified only notes.md remains. | Open: /runs/3
 ```
+
+## 安装
+
+dispatchbox 已发布到 PyPI，没有任何依赖：
+
+```bash
+pip install dispatchbox          # 或：uv tool install dispatchbox
+dispatchbox --version
+```
+
+安装后的 `dispatchbox` 命令等同于快速开始里的 `python3 -m dispatchbox`。快速开始之所以从克隆的仓库运行，是因为要用到仓库自带的 `examples/hello.json`。如果飞书应用设置了 Encrypt Key，需要安装可选依赖来解密事件：`pip install "dispatchbox[feishu-encryption]"`。
 
 ## 核心能力
 

@@ -12,7 +12,7 @@ import urllib.error
 import urllib.request
 
 from . import __version__
-from .net import ssl_context
+from .net import context_for
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -100,7 +100,7 @@ def main(argv: list[str] | None = None) -> int:
         req = urllib.request.Request(args.hub.rstrip("/") + "/events", data=json.dumps(body).encode(), method="POST",
                                      headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"})
         try:
-            with urllib.request.urlopen(req, timeout=15, context=ssl_context()) as resp:
+            with urllib.request.urlopen(req, timeout=15, context=context_for(req.full_url)) as resp:
                 print(resp.read().decode())
         except urllib.error.HTTPError as e:
             print(f"{e.code}: {e.read().decode()}", file=sys.stderr)

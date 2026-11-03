@@ -20,7 +20,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from .net import ssl_context
+from .net import context_for
 
 log = logging.getLogger("dispatchbox.worker")
 
@@ -55,7 +55,7 @@ class HubClient:
         req = urllib.request.Request(self.base + path, data=data, method=method, headers={
             "Authorization": f"Bearer {self.token}", "Content-Type": "application/json"})
         try:
-            with urllib.request.urlopen(req, timeout=timeout, context=ssl_context()) as resp:
+            with urllib.request.urlopen(req, timeout=timeout, context=context_for(req.full_url)) as resp:
                 raw = resp.read()
                 return resp.status, (json.loads(raw) if raw else None)
         except urllib.error.HTTPError as e:

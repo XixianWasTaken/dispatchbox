@@ -26,3 +26,8 @@ def ssl_context() -> ssl.SSLContext:
         return ctx
     ctx.load_verify_locations(certifi.where())
     return ctx
+
+
+def context_for(url: str) -> ssl.SSLContext | None:
+    """TLS settings for url, or None for plain HTTP, so a local hub never triggers the certificate warning."""
+    return ssl_context() if url.lower().startswith("https:") else None

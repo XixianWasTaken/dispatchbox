@@ -50,5 +50,16 @@ class SSLContextTest(unittest.TestCase):
             self.assertIs(net.ssl_context(), ctx)
 
 
+class ContextForTest(unittest.TestCase):
+    def test_plain_http_needs_no_trust_store(self):
+        with mock.patch.object(net, "ssl_context") as ctx:
+            self.assertIsNone(net.context_for("http://127.0.0.1:8787/events"))
+            ctx.assert_not_called()
+
+    def test_https_uses_the_shared_context(self):
+        with mock.patch.object(net, "ssl_context", return_value="ctx"):
+            self.assertEqual(net.context_for("HTTPS://hub.example.com/claim"), "ctx")
+
+
 if __name__ == "__main__":
     unittest.main()
