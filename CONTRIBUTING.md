@@ -58,6 +58,12 @@ Register it in `adapters_from_env` and add tests against the fake API in `tests/
 - Add a line under Unreleased in [CHANGELOG.md](CHANGELOG.md) for anything a user would notice.
 - CI (`.github/workflows/test.yml`) runs the tests on Linux and macOS with Python 3.10 to 3.14. It must pass.
 
+## Releasing
+
+1. Set the new version in `pyproject.toml` and `dispatchbox/__init__.py`, and move the Unreleased notes in [CHANGELOG.md](CHANGELOG.md) under that version.
+2. Commit, then tag and push: `git tag -a vX.Y.Z -m "dispatchbox X.Y.Z" && git push origin main vX.Y.Z`.
+3. `.github/workflows/publish.yml` checks that the tag matches the version, runs the tests, builds the package and uploads it to PyPI through trusted publishing. No PyPI token is involved.
+
 ## Reporting security issues
 
 Do not open a public issue for something that lets others run code on a worker or bypass an allowlist. See [SECURITY.md](SECURITY.md).
