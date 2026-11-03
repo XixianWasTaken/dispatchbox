@@ -4,6 +4,8 @@ All notable changes are recorded here.
 
 ## Unreleased
 
+## 0.1.1 - 2026-11-03
+
 ### Fixed
 
 - Resuming a Codex session after a decision failed when the follow-up rule's `args` contained `-s` or `--sandbox`, which `codex exec resume` does not accept. The worker now passes the sandbox as `-c sandbox_mode="..."` when resuming.

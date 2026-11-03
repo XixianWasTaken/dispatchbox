@@ -36,7 +36,7 @@ CODEX_FAILED = "\n".join([
 ])
 
 
-# Schema exactly as released in 0.1.0, before the usage and retry columns.
+# Schema of the first pre-release version, before the usage and retry columns.
 V01_SCHEMA = """
 CREATE TABLE IF NOT EXISTS events (
     id INTEGER PRIMARY KEY,
