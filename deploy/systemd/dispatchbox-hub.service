@@ -1,0 +1,14 @@
+# User unit. Install to ~/.config/systemd/user/ and put DISPATCHBOX_TOKEN=... in ~/.config/dispatchbox/env (chmod 600).
+[Unit]
+Description=dispatchbox hub
+After=network-online.target
+
+[Service]
+EnvironmentFile=%h/.config/dispatchbox/env
+WorkingDirectory=%h/dispatchbox
+ExecStart=/usr/bin/env python3 -m dispatchbox hub --rules %h/dispatchbox/rules.json --db %h/dispatchbox/dispatchbox.db
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target

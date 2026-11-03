@@ -1,0 +1,26 @@
+{
+  "require_decision_for": ["delete_data"],
+  "defaults": { "runner": "claude", "cwd": "./demo", "timeout": "5m" },
+  "rules": [
+    {
+      "name": "ask",
+      "when": { "source": "manual", "type": "ask" },
+      "prompt": "Answer briefly, about the files in the current directory: {summary}",
+      "args": ["--allowed-tools", "Read,Glob,Grep"],
+      "notify": "always"
+    },
+    {
+      "name": "tidy",
+      "when": { "source": "manual", "type": "tidy" },
+      "prompt": "Do this in the current directory: {summary}. Deleting any file counts as delete_data.",
+      "args": ["--allowed-tools", "Read,Glob,Grep"]
+    },
+    {
+      "name": "after-decision",
+      "when": { "source": "dispatchbox", "type": "decision.made" },
+      "prompt": "The owner chose: {payload.choice}. Carry on from where you stopped.",
+      "args": ["--allowed-tools", "Read,Glob,Grep,Bash(rm:*)"],
+      "notify": "always"
+    }
+  ]
+}

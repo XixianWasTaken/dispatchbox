@@ -1,0 +1,25 @@
+name: Feature request
+description: Suggest a change or a new integration
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        dispatchbox stays small and dependency-free on purpose (see CONTRIBUTING.md). Explaining the problem first helps decide whether it belongs in the core, in a rule, or in the agent CLI.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What are you trying to do, and what gets in the way today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: What would you change? A rules snippet or an example event helps.
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Workarounds you tried
+      description: For example a rule, a shell runner, or an outside script calling `POST /events`.

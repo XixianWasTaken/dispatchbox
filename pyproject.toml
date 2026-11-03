@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dispatchbox"
+version = "0.1.0"
+description = "Route events to Claude Code and Codex running on your own machines, and ask you only when it matters."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+dependencies = []
+
+[project.scripts]
+dispatchbox = "dispatchbox.__main__:main"
+
+[tool.setuptools]
+packages = ["dispatchbox"]

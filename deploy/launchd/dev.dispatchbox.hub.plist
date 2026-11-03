@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Replace __DISPATCHBOX_DIR__, __HOME__ and __TOKEN__ before loading. See docs/deployment.md "Start on login: macOS". -->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>dev.dispatchbox.hub</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/bin/env</string>
+    <string>python3</string>
+    <string>-m</string>
+    <string>dispatchbox</string>
+    <string>hub</string>
+    <string>--rules</string>
+    <string>__DISPATCHBOX_DIR__/rules.json</string>
+    <string>--db</string>
+    <string>__DISPATCHBOX_DIR__/dispatchbox.db</string>
+  </array>
+  <key>WorkingDirectory</key>
+  <string>__DISPATCHBOX_DIR__</string>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+    <key>DISPATCHBOX_TOKEN</key>
+    <string>__TOKEN__</string>
+  </dict>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <true/>
+  <key>StandardOutPath</key>
+  <string>__HOME__/Library/Logs/dispatchbox-hub.log</string>
+  <key>StandardErrorPath</key>
+  <string>__HOME__/Library/Logs/dispatchbox-hub.log</string>
+</dict>
+</plist>

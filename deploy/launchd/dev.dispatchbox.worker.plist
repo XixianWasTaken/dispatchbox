@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Replace __DISPATCHBOX_DIR__, __HOME__, __TOKEN__ and __CODE_DIR__ before loading. See docs/deployment.md "Start on login: macOS". -->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>dev.dispatchbox.worker</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/bin/env</string>
+    <string>python3</string>
+    <string>-m</string>
+    <string>dispatchbox</string>
+    <string>worker</string>
+    <string>--hub</string>
+    <string>http://127.0.0.1:8787</string>
+    <string>--allow-dir</string>
+    <string>__CODE_DIR__</string>
+  </array>
+  <key>WorkingDirectory</key>
+  <string>__DISPATCHBOX_DIR__</string>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <!-- launchd starts with a minimal PATH. claude usually lives in ~/.local/bin and codex in /opt/homebrew/bin. -->
+    <key>PATH</key>
+    <string>__HOME__/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+    <key>DISPATCHBOX_TOKEN</key>
+    <string>__TOKEN__</string>
+  </dict>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <true/>
+  <key>StandardOutPath</key>
+  <string>__HOME__/Library/Logs/dispatchbox-worker.log</string>
+  <key>StandardErrorPath</key>
+  <string>__HOME__/Library/Logs/dispatchbox-worker.log</string>
+</dict>
+</plist>

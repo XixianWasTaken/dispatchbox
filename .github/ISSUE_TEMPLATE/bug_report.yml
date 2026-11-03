@@ -1,0 +1,50 @@
+name: Bug report
+description: Something does not work as the docs say
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not report security problems here. See SECURITY.md.
+        Remove tokens, secrets and private repository content from anything you paste.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: How to reproduce
+      description: The smallest rules file and the commands or events that show the problem.
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Relevant hub and worker log lines, and the run's status, exit code and summary from the dashboard.
+      render: text
+  - type: input
+    id: commit
+    attributes:
+      label: dispatchbox commit
+      description: Output of `git rev-parse --short HEAD`
+    validations:
+      required: true
+  - type: input
+    id: env
+    attributes:
+      label: Environment
+      description: OS, Python version, and `claude --version` or `codex --version` if relevant
+      placeholder: macOS 15, Python 3.12, Claude Code 2.1
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options: [Rules and routing, Worker and runners, Decisions, GitHub webhooks, Slack, Feishu, Dashboard or API, Deployment, Docs]

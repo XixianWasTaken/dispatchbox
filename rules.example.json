@@ -1,0 +1,165 @@
+{
+  "dedupe_window": "10m",
+  "memory": [
+    "DECISIONS.md",
+    "WONT_DO.md"
+  ],
+  "require_decision_for": [
+    "delete_data",
+    "stop_service",
+    "spend_money",
+    "send_external_message",
+    "change_product_direction",
+    "create_or_rotate_secret",
+    "change_permissions"
+  ],
+  "defaults": {
+    "worker": "*",
+    "runner": "claude",
+    "timeout": "30m",
+    "notify": "on_decision"
+  },
+  "rules": [
+    {
+      "name": "pr-review",
+      "when": {
+        "source": "github",
+        "types": [
+          "pr.opened",
+          "pr.synchronize",
+          "pr.reopened"
+        ]
+      },
+      "runner": "codex",
+      "model": "gpt-6.1-sol",
+      "cwd": "~/code/myapp",
+      "args": [
+        "-s",
+        "read-only"
+      ],
+      "prompt": "Review pull request {subject} ({link}). Report only problems that will actually break something, not style. Post the review with `gh pr review`.",
+      "group": "review:{subject}",
+      "concurrency": 3,
+      "timeout": "20m"
+    },
+    {
+      "name": "ci-failed",
+      "when": {
+        "source": "github",
+        "type": "ci.failure"
+      },
+      "worker": "m4",
+      "model": "opus",
+      "cwd": "~/code/myapp",
+      "prompt": "CI failed on {subject}: {summary}. Find the cause and push a fix to the same branch.",
+      "args": [
+        "--permission-mode",
+        "acceptEdits",
+        "--allowed-tools",
+        "Bash(git:*),Bash(gh:*),Bash(npm test:*)"
+      ],
+      "notify": "on_failure"
+    },
+    {
+      "name": "issue-triage",
+      "when": {
+        "source": "github",
+        "type": "issue.opened"
+      },
+      "model": "sonnet",
+      "cwd": "~/code/myapp",
+      "skill": "issue-triage",
+      "prompt": "Triage issue {subject}: {summary}. Label it, and reply if it is a duplicate or a question.",
+      "args": [
+        "--allowed-tools",
+        "Read,Glob,Grep,Bash(gh issue:*)"
+      ]
+    },
+    {
+      "name": "feedback",
+      "when": {
+        "source": "my-hub",
+        "types": [
+          "feedback.new",
+          "feedback.followup"
+        ]
+      },
+      "worker": "m5",
+      "cwd": "~/code/my-hub",
+      "skill": "hub-feedback",
+      "prompt": "Handle feedback {subject} following the skill's section on automated runs.",
+      "group": "feedback:{subject}",
+      "concurrency": 3
+    },
+    {
+      "name": "nightly-cleanup",
+      "when": {
+        "source": "cron",
+        "type": "nightly-cleanup"
+      },
+      "worker": "m4",
+      "cwd": "~/code/myapp",
+      "skill": "weekly-cleanup",
+      "prompt": "Find code merged this week that duplicates something else, patches a single case, or is dead. Remove it and open a PR."
+    },
+    {
+      "name": "chat-request",
+      "when": {
+        "source": [
+          "slack",
+          "feishu"
+        ],
+        "types": [
+          "message.mention",
+          "message.dm"
+        ]
+      },
+      "worker": "m5",
+      "model": "opus",
+      "cwd": "~/code/myapp",
+      "prompt": "A teammate asked in chat: {summary}. Do it if it is a clear, small task. Otherwise ask one clarifying question as a decision.",
+      "group": "chat:{subject}",
+      "args": [
+        "--permission-mode",
+        "acceptEdits",
+        "--allowed-tools",
+        "Read,Edit,Glob,Grep,Bash(git:*),Bash(npm test:*)"
+      ]
+    },
+    {
+      "name": "after-decision",
+      "when": {
+        "source": "dispatchbox",
+        "type": "decision.made"
+      },
+      "prompt": "The owner answered your question with: {payload.choice}. Their note: {payload.note}. Carry on from where you stopped. If the answer settles a recurring question, add one line to DECISIONS.md or WONT_DO.md."
+    }
+  ],
+  "schedules": [
+    {
+      "name": "nightly-cleanup",
+      "cron": "0 3 * * 0"
+    }
+  ],
+  "chat": {
+    "feishu": {
+      "notify_to": "oc_your_ops_group_chat_id",
+      "notify_to_type": "chat_id",
+      "allowed_users": [
+        "ou_your_open_id"
+      ],
+      "approvers": [
+        "ou_your_open_id"
+      ]
+    },
+    "slack": {
+      "notify_channel": "C_YOUR_CHANNEL_ID",
+      "allowed_users": [
+        "U_YOUR_USER_ID"
+      ],
+      "approvers": [
+        "U_YOUR_USER_ID"
+      ]
+    }
+  }
+}

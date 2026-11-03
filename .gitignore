@@ -1,0 +1,10 @@
+__pycache__/
+*.db
+*.db-wal
+*.db-shm
+rules.json
+.venv/
+dist/
+*.egg-info/
+test-live/
+/demo/
