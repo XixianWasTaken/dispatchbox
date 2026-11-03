@@ -14,6 +14,7 @@ Start with the [README](../README.md) for what dispatchbox is and a two-minute q
 Also in the repository:
 
 - [`examples/hello.json`](../examples/hello.json): the quick start rules
+- [`examples/hello-codex.json`](../examples/hello-codex.json): the same rules for Codex
 - [`rules.example.json`](../rules.example.json): PR review, CI fixes, issue triage, a nightly job, chat requests and a decision follow-up
 - [`deploy/`](../deploy): launchd and systemd templates
 - [CONTRIBUTING.md](../CONTRIBUTING.md) and [SECURITY.md](../SECURITY.md)

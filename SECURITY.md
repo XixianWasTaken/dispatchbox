@@ -24,7 +24,7 @@ Supported version: only the latest commit on the default branch. There are no re
 
 ## What it does not protect
 
-- **The agent itself.** dispatchbox does not sandbox agents. An agent can do anything its CLI permissions and your user account allow. Narrow every rule with `--allowed-tools` (Claude) or `-s read-only` / `-s workspace-write` (Codex) in `args`.
+- **The agent itself.** dispatchbox does not sandbox agents. An agent can do anything its CLI permissions and your user account allow. Narrow every rule with `--allowed-tools` (Claude) or `-s read-only` / `-s workspace-write` (Codex) in `args`. A resumed Codex session falls back to the `sandbox_mode` in `~/.codex/config.toml` unless the follow-up rule sets one, so always set it there too.
 - **Prompt injection.** Issue bodies, PR descriptions, comments and chat messages go into prompts. Anyone who can open an issue on a public repository can write text your agent will read. Give rules fed by untrusted sources read-only permissions, and keep risky kinds of action in `require_decision_for`.
 - **A leaked token.** Whoever has `DISPATCHBOX_TOKEN` can queue runs and claim tasks. There is one token for everything, and no per-worker or per-user tokens.
 - **Transport.** The hub serves plain HTTP. Put it behind a TLS-terminating proxy or tunnel before it leaves your machine.

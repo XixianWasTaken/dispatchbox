@@ -63,7 +63,7 @@ python3 -m dispatchbox check --rules examples/hello.json
 
 **前置条件：**
 - Python **3.10+**（仅使用 Python 标准库，无需 `pip install` 任何依赖）。
-- 已安装并登录 [Claude Code](https://docs.anthropic.com/en/docs/claude-code) (`claude`) 或 [Codex CLI](https://github.com/openai/codex) (`codex`)（内置的 `examples/hello.json` 默认使用 `claude`）。
+- 已安装并登录 [Claude Code](https://docs.anthropic.com/en/docs/claude-code) (`claude`) 或 [Codex CLI](https://github.com/openai/codex) (`codex`)。内置的 `examples/hello.json` 使用 `claude`；如果用 Codex，把下面命令里的规则文件换成 [`examples/hello-codex.json`](examples/hello-codex.json)。
 
 ### 1. 创建演示目录与共享 Token
 

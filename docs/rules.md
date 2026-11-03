@@ -131,6 +131,12 @@ What the worker runs for each runner:
 
 Prompts go through stdin so they do not show up in `ps`. The binaries can be changed with `--claude-bin` and `--codex-bin` on the worker.
 
+Notes for Codex:
+
+- `codex exec resume` does not accept `-s` / `--sandbox`. When the worker resumes a Codex session, it passes `-s X` or `--sandbox X` from `args` as `-c sandbox_mode="X"` instead, so the same `args` work for new and resumed runs.
+- A resumed Codex session does not keep the sandbox of the run it continues. Without a sandbox flag in the follow-up rule, Codex uses `sandbox_mode` from your `~/.codex/config.toml`, which may be `danger-full-access`. Always set it in the follow-up rule.
+- Codex refuses to run outside a Git repository unless `args` include `--skip-git-repo-check`.
+
 ## Matching and routing
 
 1. The hub drops the event if its `dedupe_key` was seen within the window.
@@ -217,7 +223,7 @@ Nothing happens next unless a rule matches it. A rule like this one does:
 
 The run it creates records the original run as its parent. The worker resumes the parent's agent session with `claude --resume <session>` or `codex exec resume <session>`, so the agent keeps everything it already found.
 
-The follow-up rule can grant more than the first one. In [`examples/hello.json`](../examples/hello.json), the first rule may only read files and the follow-up may also run `rm`. To give different follow-ups to different rules, match on `subject` or write the condition into the prompt using `{payload.rule}`.
+The follow-up rule can grant more than the first one. In [`examples/hello.json`](../examples/hello.json), the first rule may only read files and the follow-up may also run `rm`. [`examples/hello-codex.json`](../examples/hello-codex.json) does the same with Codex, going from `-s read-only` to `-s workspace-write`. To give different follow-ups to different rules, match on `subject` or write the condition into the prompt using `{payload.rule}`.
 
 ## Results
 

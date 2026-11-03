@@ -63,7 +63,7 @@ Most developers already have `claude` or `codex` signed in on their workstation 
 
 **Prerequisites:**
 - Python **3.10+** (uses the Python standard library only; no `pip install` required).
-- [Claude Code](https://docs.anthropic.com/en/docs/claude-code) (`claude`) or [Codex CLI](https://github.com/openai/codex) (`codex`) installed and signed in (`examples/hello.json` uses `claude`).
+- [Claude Code](https://docs.anthropic.com/en/docs/claude-code) (`claude`) or [Codex CLI](https://github.com/openai/codex) (`codex`) installed and signed in. `examples/hello.json` uses `claude`; for Codex, use [`examples/hello-codex.json`](https://github.com/XixianWasTaken/dispatchbox/blob/main/examples/hello-codex.json) in the commands below.
 
 ### 1. Create a scratch workspace and shared token
 

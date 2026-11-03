@@ -132,6 +132,7 @@ def build_command(task: dict[str, Any], cfg: WorkerConfig, tmpdir: str) -> tuple
         cmd = [cfg.codex_bin, "exec"]
         if resume:
             cmd += ["resume", resume]
+            extra = _sandbox_as_config(extra)
         cmd += ["--json", "-o", last]
         if model:
             cmd += ["-m", model]
@@ -139,6 +140,24 @@ def build_command(task: dict[str, Any], cfg: WorkerConfig, tmpdir: str) -> tuple
     if runner == "shell":
         return ["/bin/sh", "-c", task["command"]], None
     raise ValueError(f"unknown runner {runner!r}")
+
+
+def _sandbox_as_config(args: list[str]) -> list[str]:
+    """`codex exec resume` rejects -s/--sandbox, so pass the same choice as a config override."""
+    out: list[str] = []
+    i = 0
+    while i < len(args):
+        a = args[i]
+        if a in {"-s", "--sandbox"} and i + 1 < len(args):
+            out += ["-c", f'sandbox_mode="{args[i + 1]}"']
+            i += 2
+            continue
+        if a.startswith("--sandbox="):
+            out += ["-c", f'sandbox_mode="{a.split("=", 1)[1]}"']
+        else:
+            out.append(a)
+        i += 1
+    return out
 
 
 def parse_output(runner: str, stdout: str, stderr: str, tmpdir: str) -> dict[str, Any]:

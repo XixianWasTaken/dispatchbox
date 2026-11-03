@@ -11,6 +11,7 @@ Start with the hub log and the run's page on the dashboard. The page shows the f
 | A run fails with exit code 126 | The rule's `cwd` is outside the worker's `--allow-dir` directories, or does not exist on that machine. |
 | A run fails with exit code 127 | The worker cannot find `claude` or `codex`. Under launchd or systemd, check the `PATH` in the service file. |
 | A run fails with exit code 124 | It hit its `timeout`. |
+| A Codex run fails with "Not inside a trusted directory and --skip-git-repo-check was not specified." | The rule's `cwd` is not a Git repository. Add `--skip-git-repo-check` to the rule's `args`. |
 | A run `failed` with exit code 0 | The agent reported `DISPATCHBOX_STATUS: failed`, often because a permission was denied. Its output says which. Widen the rule's `args`. |
 | A run is `lost` | The worker stopped sending heartbeats: it was stopped, crashed or lost its network. Set `retries` if the task is safe to repeat. |
 | Nothing happens after a decision | No rule matches `source: dispatchbox`, `type: decision.made`. Add one; see [Decisions](rules.md#decisions). |

@@ -9,7 +9,7 @@ from pathlib import Path
 from dispatchbox import store
 from dispatchbox.hub import Hub, extract_status
 from dispatchbox.rules import load_config
-from dispatchbox.worker import parse_output
+from dispatchbox.worker import WorkerConfig, build_command, parse_output
 from tests.helpers import FakeClock, write_rules
 
 RULES = {
@@ -189,6 +189,20 @@ class Step0Units(unittest.TestCase):
             bad = parse_output("codex", CODEX_FAILED, "", d)
         self.assertTrue(bad["agent_error"])
         self.assertIn("The model is not supported", bad["output"])
+
+    def test_codex_resume_passes_the_sandbox_as_config(self):
+        cfg = WorkerConfig(hub="", name="w", token="t")
+        task = {"runner": "codex", "prompt": "p", "args": ["-s", "workspace-write", "--sandbox=read-only", "--skip-git-repo-check"]}
+        with tempfile.TemporaryDirectory() as d:
+            fresh, _ = build_command(task, cfg, d)
+            resumed, _ = build_command({**task, "resume_session": "t-1"}, cfg, d)
+        self.assertIn("-s", fresh)  # a new session takes the flag as written
+        self.assertEqual(resumed[:4], ["codex", "exec", "resume", "t-1"])
+        self.assertNotIn("-s", resumed)
+        self.assertNotIn("--sandbox=read-only", resumed)
+        self.assertIn('sandbox_mode="workspace-write"', resumed)
+        self.assertIn('sandbox_mode="read-only"', resumed)
+        self.assertIn("--skip-git-repo-check", resumed)
 
     def test_migrates_old_database(self):
         with tempfile.TemporaryDirectory() as d:
