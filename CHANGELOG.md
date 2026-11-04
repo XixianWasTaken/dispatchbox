@@ -4,6 +4,8 @@ All notable changes are recorded here.
 
 ## Unreleased
 
+## 0.1.3 - 2026-11-04
+
 ### Fixed
 
 - A run that continued an agent session after a decision recorded the session's running total, so the cost of the earlier runs (Claude) or their token counts (Codex) were counted twice. Each run now records only its own share.
