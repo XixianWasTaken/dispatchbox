@@ -4,6 +4,11 @@ All notable changes are recorded here.
 
 ## Unreleased
 
+### Fixed
+
+- A run that continued an agent session after a decision recorded the session's running total, so the cost of the earlier runs (Claude) or their token counts (Codex) were counted twice. Each run now records only its own share.
+- Claude Code with `verbose` on, by flag or in its settings, prints its JSON output as one array on a single line. The worker took that for raw output and lost the result, the session ID and the cost. It now reads the result out of the array.
+
 ## 0.1.2 - 2026-11-03
 
 ### Fixed

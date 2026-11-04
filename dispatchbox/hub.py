@@ -231,7 +231,7 @@ class Hub:
 
     def finish(self, run_id: int, worker: str, result: dict[str, Any]) -> dict[str, Any]:
         with self.lock:
-            self._running(run_id, worker)
+            row = self._running(run_id, worker)
             exit_code = int(result.get("exit_code", 1))
             output = str(result.get("output", ""))
             summary = result.get("summary") or extract_summary(output)
@@ -246,18 +246,49 @@ class Hub:
                 status = "failed"
             else:
                 status = "succeeded"
+            usage = (_num(result.get("cost_usd"), float), _num(result.get("input_tokens"), int),
+                     _num(result.get("output_tokens"), int))
+            if row["parent_run"] and result.get("session_id"):
+                usage = self._own_share(row, str(result["session_id"]), *usage)
             self.db.execute(
                 "UPDATE runs SET status=?, finished_at=?, exit_code=?, summary=?, session_id=?, output_tail=?, "
                 "decision_request=?, cost_usd=?, input_tokens=?, output_tokens=? WHERE id=?",
                 (status, self.clock(), exit_code, (summary or "")[:2000], result.get("session_id"),
                  output[-8000:], json.dumps(decision_req, ensure_ascii=False) if decision_req else None,
-                 _num(result.get("cost_usd"), float), _num(result.get("input_tokens"), int),
-                 _num(result.get("output_tokens"), int), run_id),
+                 *usage, run_id),
             )
             self.cv.notify_all()
             run = self.get_run(run_id)
         self._maybe_notify(run)
         return {"run_id": run_id, "status": status}
+
+    def _own_share(self, row: Any, session_id: str, cost: float | None, tokens_in: int | None,
+                   tokens_out: int | None) -> tuple[float | None, int | None, int | None]:
+        """A continued session reports running totals: claude's total_cost_usd covers every call of the session so
+        far (its token counts cover the call alone), and codex's token counts do the same. Verified with claude 2.1.310
+        and codex 0.166. Take off what earlier runs of the same session recorded, so each run holds only its own share.
+        A figure below that total is a per-call one and is kept as reported."""
+        prev_cost, prev_in, prev_out = 0.0, 0, 0
+        rid = row["parent_run"]
+        while rid:
+            earlier = self.db.execute(
+                "SELECT parent_run, session_id, cost_usd, input_tokens, output_tokens FROM runs WHERE id=?", (rid,)
+            ).fetchone()
+            if earlier is None or earlier["session_id"] != session_id:
+                break
+            prev_cost += earlier["cost_usd"] or 0
+            prev_in += earlier["input_tokens"] or 0
+            prev_out += earlier["output_tokens"] or 0
+            rid = earlier["parent_run"]
+        runner = json.loads(row["spec"]).get("runner")
+        if runner == "claude" and cost is not None and cost >= prev_cost:
+            cost -= prev_cost
+        if runner == "codex":
+            if tokens_in is not None and tokens_in >= prev_in:
+                tokens_in -= prev_in
+            if tokens_out is not None and tokens_out >= prev_out:
+                tokens_out -= prev_out
+        return cost, tokens_in, tokens_out
 
     def decide(self, run_id: int, choice: str, note: str = "", by: str = "human") -> dict[str, Any]:
         with self.lock:

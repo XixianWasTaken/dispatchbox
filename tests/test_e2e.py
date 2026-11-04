@@ -34,8 +34,9 @@ elif "DELETE" in prompt:
 else:
     text = "did the work\nDISPATCHBOX_SUMMARY: reviewed " + os.environ["DISPATCHBOX_RULE"]
 assert "DISPATCHBOX_TOKEN" not in os.environ, "token leaked to agent"
+cost = 0.03 if "--resume" in args else 0.01   # like the real CLI, a resumed session reports its running total
 print(json.dumps({"type": "result", "result": text, "session_id": "sess-42", "is_error": False,
-                  "total_cost_usd": 0.01, "usage": {"input_tokens": 10, "cache_read_input_tokens": 90,
+                  "total_cost_usd": cost, "usage": {"input_tokens": 10, "cache_read_input_tokens": 90,
                                                     "output_tokens": 7}}))
 """
 
@@ -171,6 +172,8 @@ class E2ETest(unittest.TestCase):
         follow = [r for r in self.hub.list_runs() if r.get("parent_run") == rid][0]
         run = self.wait_status(follow["id"], {"succeeded", "failed"})
         self.assertEqual(run["summary"], "resumed sess-42")
+        self.assertAlmostEqual(run["cost_usd"], 0.02, msg="only this run's share of the session total")
+        self.assertEqual((run["input_tokens"], run["output_tokens"]), (100, 7))
 
     def test_agent_reported_failure(self):
         self.start_worker()

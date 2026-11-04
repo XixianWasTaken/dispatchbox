@@ -16,8 +16,16 @@ RULES = {
     "rules": [
         {"name": "job", "when": {"source": "s"}, "prompt": "do {subject}", "group": "{subject}"},
         {"name": "retry-job", "when": {"source": "r"}, "prompt": "do {subject}", "retries": 1, "notify": "on_failure"},
+        {"name": "after", "when": {"source": "dispatchbox", "type": "decision.made"}, "prompt": "go on"},
     ]
 }
+CODEX_RULES = {
+    "rules": [
+        {"name": "job", "when": {"source": "s"}, "runner": "codex", "prompt": "do {subject}"},
+        {"name": "after", "when": {"source": "dispatchbox", "type": "decision.made"}, "runner": "codex", "prompt": "go on"},
+    ]
+}
+ASK = 'DISPATCHBOX_DECISION: {"question": "Go on?", "options": ["yes", "no"]}'
 
 # Shapes copied from real `claude -p --output-format json` and `codex exec --json` output.
 CLAUDE_OUT = json.dumps({"type": "result", "is_error": False, "session_id": "s-1", "total_cost_usd": 0.0024359,
@@ -104,6 +112,44 @@ class Step0Hub(unittest.TestCase):
         self.hub.finish(task["run_id"], "w", {"exit_code": exit_code, "output": output, **extra})
         return self.hub.get_run(task["run_id"])
 
+    def continue_session(self, run_id, output="done", **extra):
+        """Answer the decision run_id waits for, then finish the follow-up run with the given result."""
+        follow = self.hub.decide(run_id, "yes")["follow_up"]["runs"][0]
+        task = self.hub.claim("w")
+        self.assertEqual((task["run_id"], task["resume_session"]), (follow, self.hub.get_run(run_id)["session_id"]))
+        self.hub.finish(follow, "w", {"exit_code": 0, "output": output, **extra})
+        return self.hub.get_run(follow)
+
+    def test_continued_claude_session_records_only_its_own_cost(self):
+        # Figures from a real claude 2.1.310 session: the resumed call reports the session's running total cost,
+        # while its token counts cover that call alone.
+        first = self.run_once(ASK, session_id="s-1", cost_usd=0.72866, input_tokens=36424, output_tokens=4)
+        second = self.continue_session(first["id"], ASK, session_id="s-1", cost_usd=0.895048,
+                                       input_tokens=36466, output_tokens=4)
+        self.assertAlmostEqual(second["cost_usd"], 0.166388)
+        self.assertEqual((second["input_tokens"], second["output_tokens"]), (36466, 4))
+        third = self.continue_session(second["id"], session_id="s-1", cost_usd=1.0, input_tokens=100, output_tokens=2)
+        self.assertAlmostEqual(third["cost_usd"], 0.104952, msg="the whole chain counts, not just the parent")
+        self.assertAlmostEqual(first["cost_usd"], 0.72866, msg="the first run is left alone")
+
+    def test_continued_codex_session_records_only_its_own_tokens(self):
+        # Figures from a real codex 0.166 session: the resumed call reports the session's running token totals.
+        self.hub.close()
+        self.hub = Hub(write_rules(self.tmp.name, CODEX_RULES), str(Path(self.tmp.name, "c.db")), lost_after=60,
+                       clock=self.clock)
+        first = self.run_once(ASK, session_id="t-1", input_tokens=23372, output_tokens=5)
+        second = self.continue_session(first["id"], session_id="t-1", input_tokens=50928, output_tokens=10)
+        self.assertEqual((second["input_tokens"], second["output_tokens"]), (27556, 5))
+        self.assertIsNone(second["cost_usd"])
+
+    def test_usage_of_a_new_session_or_below_the_total_is_kept(self):
+        first = self.run_once(ASK, session_id="s-1", cost_usd=0.5)
+        fresh = self.continue_session(first["id"], session_id="s-2", cost_usd=0.4)
+        self.assertAlmostEqual(fresh["cost_usd"], 0.4, msg="a new session owes nothing to the old one")
+        first = self.run_once(ASK, session_id="s-3", cost_usd=0.5)
+        same = self.continue_session(first["id"], session_id="s-3", cost_usd=0.1)
+        self.assertAlmostEqual(same["cost_usd"], 0.1, msg="a figure below the running total is per call")
+
     def test_agent_failed_verdict_beats_clean_exit(self):
         run = self.run_once("tried\nDISPATCHBOX_STATUS: failed\nDISPATCHBOX_SUMMARY: permission denied, file kept")
         self.assertEqual(run["status"], "failed")
@@ -177,6 +223,17 @@ class Step0Units(unittest.TestCase):
         self.assertEqual(out["input_tokens"], 2 + 10973 + 23910)
         self.assertEqual(out["output_tokens"], 4)
         self.assertEqual(out["session_id"], "s-1")
+
+    def test_parse_claude_verbose_array(self):
+        # With verbose on, claude 2.1.310 prints every message as one JSON array on a single line.
+        line = json.dumps([{"type": "system", "subtype": "init"}, {"type": "assistant"}, {"type": "rate_limit_event"},
+                           json.loads(CLAUDE_OUT)])
+        with tempfile.TemporaryDirectory() as d:
+            out = parse_output("claude", line + "\n", "", d)
+        self.assertEqual((out["output"], out["session_id"], out["cost_usd"]), ("ok", "s-1", 0.0024359))
+        with tempfile.TemporaryDirectory() as d:
+            none = parse_output("claude", '[{"type": "system"}]\n', "", d)
+        self.assertNotIn("session_id", none, "an array without a result is read as raw output")
 
     def test_parse_codex_success_and_failure(self):
         with tempfile.TemporaryDirectory() as d:

@@ -242,7 +242,7 @@ The hub decides the run's status like this:
 
 The second rule matters. An agent stopped by a denied permission usually still exits 0, and only its own status line says the work was not done.
 
-For each run the hub stores the exit code, the summary, the last 8,000 characters of output, the agent session ID, and for Claude the cost in USD and token counts. Codex runs record tokens only.
+For each run the hub stores the exit code, the summary, the last 8,000 characters of output, the agent session ID, and for Claude the cost in USD and token counts. Codex runs record tokens only. A run that continues an earlier session records its own share: the CLIs report a running total for a resumed session, and the hub takes off what the earlier runs of that session already recorded.
 
 Worker-side exit codes worth knowing:
 

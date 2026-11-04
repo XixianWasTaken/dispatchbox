@@ -167,6 +167,9 @@ def parse_output(runner: str, stdout: str, stderr: str, tmpdir: str) -> dict[str
             data = json.loads(stdout.strip().splitlines()[-1]) if stdout.strip() else {}
         except (json.JSONDecodeError, IndexError):
             data = {}
+        if isinstance(data, list):
+            # With verbose on, by flag or in its settings, Claude prints every message as one JSON array on one line.
+            data = next((m for m in reversed(data) if isinstance(m, dict) and m.get("type") == "result"), {})
         if isinstance(data, dict) and "result" in data:
             out = {"output": str(data.get("result") or ""), "session_id": data.get("session_id")}
             if data.get("is_error"):
