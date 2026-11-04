@@ -130,6 +130,19 @@ class E2ETest(unittest.TestCase):
         self.assertEqual(http("GET", self.base + "/healthz", token=None)[0], 200)
         self.assertEqual(http("POST", self.base + "/events", {"source": "a"})[0], 400)
 
+    def test_api_errors_are_json_without_an_accept_header(self):
+        no_accept = {"Accept": ""}
+        s, body = http("POST", self.base + "/runs/999/decision", {"choice": "x"}, headers=no_accept)
+        self.assertEqual(s, 404)
+        self.assertEqual(json.loads(body), {"error": "run 999 not found"})
+        s, body = http("POST", self.base + "/runs/999/decision", {"choice": "x"}, token=None, headers=no_accept)
+        self.assertEqual(s, 401)
+        self.assertIn("error", json.loads(body))
+        # A browser posting the dashboard form still gets a page.
+        s, body = http("POST", self.base + "/runs/999/decision", token=None, form="choice=x",
+                       headers={"Accept": "text/html"})
+        self.assertTrue(body.lstrip().startswith("<!doctype html>"), body[:80])
+
     def test_full_loop_with_decision_and_resume(self):
         self.start_worker()
         s, body = http("POST", self.base + "/events", {"source": "github", "type": "pr.opened", "subject": "r#1"})

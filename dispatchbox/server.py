@@ -151,7 +151,7 @@ class Handler(BaseHTTPRequestHandler):
         try:
             self._route(method, parts, query)
         except HubError as e:
-            if parts[:1] in (["api"], ["events"], ["claim"], ["hooks"]) or self.headers.get("Accept", "").startswith("application/json"):
+            if self._wants_json(parts):
                 self._json(e.status, {"error": str(e)})
             else:
                 self._html(e.status, page("Error", f"<p>{html.escape(str(e))}</p><p><a href='/'>Back</a></p>"))
@@ -160,6 +160,13 @@ class Handler(BaseHTTPRequestHandler):
         except Exception as e:
             log.exception("request failed")
             self._json(500, {"error": f"internal error: {e.__class__.__name__}"})
+
+    def _wants_json(self, parts: list[str]) -> bool:
+        """API clients get JSON errors; only a browser using the dashboard gets an HTML page."""
+        return (parts[:1] in (["api"], ["events"], ["claim"], ["hooks"])
+                or self.headers.get("Accept", "").startswith("application/json")
+                or self.headers.get("Content-Type", "").startswith("application/json")
+                or self.headers.get("Authorization", "").startswith("Bearer "))
 
     def _route(self, method: str, parts: list[str], q: dict[str, str]) -> None:
         if parts == ["healthz"]:

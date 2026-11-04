@@ -4,6 +4,10 @@ All notable changes are recorded here.
 
 ## Unreleased
 
+### Fixed
+
+- API calls to `/runs/...` got an HTML error page unless they sent `Accept: application/json`. Requests with a bearer token or a JSON body now always get JSON errors.
+
 ## 0.1.1 - 2026-11-03
 
 ### Fixed

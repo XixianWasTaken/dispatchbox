@@ -84,7 +84,7 @@ A half-configured chat platform stops the hub at start with a message naming the
 
 ## HTTP API
 
-API endpoints take `Authorization: Bearer <DISPATCHBOX_TOKEN>`. Errors come back as `{"error": "..."}` with a 4xx status. For `/runs/...` paths, send `Accept: application/json` to get JSON errors; without it they are rendered as an HTML page.
+API endpoints take `Authorization: Bearer <DISPATCHBOX_TOKEN>`. Errors come back as `{"error": "..."}` with a 4xx status. A request with a bearer token, a JSON body or `Accept: application/json` always gets JSON errors. Only the dashboard, used from a browser, gets error pages in HTML.
 
 ### Sources
 
